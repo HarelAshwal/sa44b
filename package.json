@@ -12,7 +12,9 @@
     "ref-struct": "^1.1.0"
   },
   "devDependencies": {
+    "@types/ffi": "^0.2.2",
     "@types/jest": "^23.3.9",
+    "@types/node": "^11.13.8",
     "jest": "^23.6.0",
     "ts-jest": "^23.10.4",
     "typescript": "^3.1.6"

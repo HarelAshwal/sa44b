@@ -110,7 +110,6 @@ export class Sa44b {
 
     constructor() {
         this.InitFFI();
-        this.Open();
         this.handle = 0;
     }
 
@@ -122,17 +121,33 @@ export class Sa44b {
 
 
     InitFFI() {
-        var int16Ptr = ref.refType('int16');
+        var intPtr = ref.refType('int');
 
-        this.api = ffi.Library('sa_api', {
+        var RTLD_GLOBAL = ffi.DynamicLibrary.FLAGS.RTLD_GLOBAL;
+        // this.api = ffi.DynamicLibrary(__dirname + './sa_api.dll');
+        this.api = ffi.Library(__dirname + './sa_api.dll', {
             //  static extern saStatus saOpenDevice(ref int device);
-            'saOpenDevice': ['int', ['int']],
+            'saOpenDevice': ['byte', [intPtr]],
 
-            // private static extern IntPtr saGetAPIVersion();
+            //      private static extern IntPtr saGetAPIVersion();
             'saGetAPIVersion': ['string', []],
 
 
         });
+
+        //  this.api = ffi.Library('usbi2cio', {
+        // 'DAPI_GetDllVersion': ['int', []],
+
+        // // public static extern int DAPI_OpenDeviceInstance(string lpsDevName, byte byDevInstance);
+        // 'DAPI_OpenDeviceInstance': ['int', ['string', 'byte']],
+
+        // // public static extern bool DAPI_GetFirmwareVersion(IntPtr hDevInstance, ref DAPI_WORD pwVersion);
+        // 'DAPI_GetFirmwareVersion': ['bool', ['int', intPtr]],
+
+
+        // });
+
+        var a = 10;
     }
 
     toHexString(byteArray: number[]) {

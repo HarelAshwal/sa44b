@@ -8,7 +8,5 @@
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "devasys-i2c": "^0.4.9"
-  }
+  "dependencies": {}
 }
