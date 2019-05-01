@@ -3,8 +3,110 @@ import * as ref from 'ref';
 import * as Struct from 'ref-struct';
 import * as ArrayType from 'ref-array';
 
+export enum saStatus {
+    // Configuration Errors
+    saInvalidModeErr = -112,
+    saReferenceLevelErr = -111,
+    saInvalidVideoUnitsErr = -110,
+    saInvalidWindowErr = -109,
+    saInvalidBandwidthTypeErr = -108,
+    saInvalidSweepTimeErr = -107,
+    saBandwidthErr = -106,
+    saInvalidGainErr = -105,
+    saAttenuationErr = -104,
+    saFrequencyRangeErr = -103,
+    saInvalidSpanErr = -102,
+    saInvalidScaleErr = -101,
+    saInvalidDetectorErr = -100,
 
-export class DevasysI2C {
+    // General Errors
+    saUSBTimeoutErr = -15,
+    saDeviceConnectionErr = -14,
+    saPacketFramingErr = -13,
+    saGPSErr = -12,
+    saGainNotSetErr = -11,
+    saDeviceNotIdleErr = -10,
+    saDeviceInvalidErr = -9,
+    saBufferTooSmallErr = -8,
+    saNullPtrErr = -7,
+    saAllocationLimitErr = -6,
+    saDeviceAlreadyStreamingErr = -5,
+    saInvalidParameterErr = -4,
+    saDeviceNotConfiguredErr = -3,
+    saDeviceNotStreamingErr = -2,
+    saDeviceNotOpenErr = -1,
+
+    // No Error
+    saNoError = 0,
+
+    // Warnings/Messages
+    saAdjustedParameter = 1,
+    saADCOverflow = 2,
+    saNoTriggerFound = 3,
+    saClampedToUpperLimit = 4,
+    saClampedToLowerLimit = 5,
+    saUncalibratedDevice = 6
+};
+
+export class Sa44b {
+
+    // saGetDeviceType : type
+    static sa_DEVICE_sa124B = 0x4;
+    static sa_DEVICE_sa44B = 0x2;
+    // saConfigureLevel : atten
+    static sa_AUTO_ATTEN = -1;
+    // saConfigureGain : gain
+    static sa_AUTO_GAIN = -1;
+    // saConfigAcquisition : detector
+    static sa_MIN_AND_MAX = 0x0;
+    static sa_AVERAGE = 0x1;
+    static sa_MIN_ONLY = 0x2;
+    static sa_MAX_ONLY = 0x3;
+    // saConfigAcquisition : scale
+    static sa_LOG_SCALE = 0x0;
+    static sa_LIN_SCALE = 0x1;
+    static sa_LOG_FULL_SCALE = 0x2;
+    static sa_LIN_FULL_SCALE = 0x3;
+    // saConfigureSweepCoupling : rbwType
+    static sa_NATIVE_RBW = 0x0;
+    static sa_NON_NATIVE_RBW = 0x1;
+    // saConfigureSweepCoupling : rejection
+    static sa_NO_SPUR_REJECT = 0x0;
+    static sa_SPUR_REJECT = 0x1;
+    // saConfigureWindow : window
+    static sa_NUTALL = 0x0;
+    static sa_BLACKMAN = 0x1;
+    static sa_HAMMING = 0x2;
+    static sa_FLAT_TOP = 0x3;
+    // saConfigureProcUnits : units
+    static sa_LOG = 0x0;
+    static sa_VOLTAGE = 0x1;
+    static sa_POWER = 0x2;
+    static sa_SAMPLE = 0x3;
+    // saConfigureIQ : downsampleFactor
+    static sa_MIN_DECIMATION = 1; // 2 ^ 0
+    static sa_MAX_DECIMATION = 128; // 2 ^ 7
+    // saInitiate : mode
+    static sa_SWEEPING = 0x0;
+    static sa_REAL_TIME = 0x1;
+    static sa_STREAMING = 0x4;
+    static sa_AUDIO_DEMOD = 0x7;
+    // saInitiate : flag
+    static sa_STREAM_IQ = 0x0;
+    static sa_STREAM_IF = 0x1;
+    // saConfigureIO : port1
+    static sa_PORT1_AC_COUPLED = 0x00;
+    static sa_PORT1_DC_COUPLED = 0x04;
+    static sa_PORT1_INT_REF_OUT = 0x00;
+    static sa_PORT1_EXT_REF_IN = 0x08;
+    static sa_PORT1_OUT_AC_LOAD = 0x10;
+    static sa_PORT1_OUT_LOGIC_LOW = 0x14;
+    static sa_PORT1_OUT_LOGIC_HIGH = 0x1C;
+    // saConfigureIO : port2
+    static sa_PORT2_OUT_LOGIC_LOW = 0x00;
+    static sa_PORT2_OUT_LOGIC_HIGH = 0x20;
+    static sa_PORT2_IN_TRIGGER_RISING_EDGE = 0x40;
+    static sa_PORT2_IN_TRIGGER_FALLING_EDGE = 0x60;
 
     constructor() {
         this.InitFFI();
@@ -12,37 +114,24 @@ export class DevasysI2C {
         this.handle = 0;
     }
 
-    libi2c: any;
-    handle: number;
+    api: any;
+    handle: number = -1;
 
-    DAPI_I2C_TRANS_DAMP = Struct({
-        'byType': 'byte',
-        'byDevId': 'byte',
-        'wMemAddr': 'int16',
-        'wCount': 'int16',
-        'Data': ArrayType('byte', 30)
-    });
+
 
 
 
     InitFFI() {
         var int16Ptr = ref.refType('int16');
-        var DAPI_I2C_TRANS_DAMPPtr = ref.refType(this.DAPI_I2C_TRANS_DAMP);
 
-        this.libi2c = ffi.Library('usbi2cio', {
-            'DAPI_GetDllVersion': ['int', []],
+        this.api = ffi.Library('sa_api', {
+            //  static extern saStatus saOpenDevice(ref int device);
+            'saOpenDevice': ['int', ['int']],
 
-            // public static extern int DAPI_OpenDeviceInstance(string lpsDevName, byte byDevInstance);
-            'DAPI_OpenDeviceInstance': ['int', ['string', 'byte']],
+            // private static extern IntPtr saGetAPIVersion();
+            'saGetAPIVersion': ['string', []],
 
-            // public static extern bool DAPI_GetFirmwareVersion(IntPtr hDevInstance, ref DAPI_WORD pwVersion);
-            'DAPI_GetFirmwareVersion': ['bool', ['int', int16Ptr]],
 
-            // public static extern int DAPI_ReadI2c(IntPtr hDevInstance, ref DAPI_I2C_TRANS_Long TransI2c);
-            'DAPI_ReadI2c': ['bool', ['int', DAPI_I2C_TRANS_DAMPPtr]],
-
-            // public static extern int DAPI_WriteI2c(IntPtr hDevInstance, ref DAPI_I2C_TRANS TransI2c);
-            'DAPI_WriteI2c': ['bool', ['int', DAPI_I2C_TRANS_DAMPPtr]],
         });
     }
 
@@ -52,48 +141,30 @@ export class DevasysI2C {
         }).join(',')
     }
 
-    ReadI2C(devAddr: number, numOfBytes: number): number[] {
+    Open() {
+        var dev = ref.alloc('int') as any;
 
-        var I2CTransRef = ref.alloc(this.DAPI_I2C_TRANS_DAMP);
-        I2CTransRef[0] = 0;    // type
-        I2CTransRef[1] = devAddr; // dev addr
-        I2CTransRef[4] = numOfBytes;   // count
-
-        var result = this.libi2c.DAPI_ReadI2c(this.handle, I2CTransRef);
-
-        var arr = [...I2CTransRef];
-        var arr_sliced = arr.slice(6, 6 + numOfBytes);
-
-        console.log("READ [0x" + devAddr.toString(16) + "]: " + this.toHexString(arr_sliced));
-        return arr_sliced;
-    }
-
-    WriteI2C(devAddr: number, data: number[]) {
-        var I2CTransRef = ref.alloc(this.DAPI_I2C_TRANS_DAMP);
-        I2CTransRef[0] = 0;    // type
-        I2CTransRef[1] = devAddr; // dev addr
-        I2CTransRef[4] = data.length;  // count
-
-        for (var i = 0; i < data.length; i++) {
-            I2CTransRef[i + 6] = data[i];
+        var status = this.api.saOpenDevice(dev) as saStatus;
+        if (status != saStatus.saNoError) {
+            console.log("Error: Unable to open sa");
+            //   console.log(sa_api.saGetStatusString(status));
+            //   prompt_user_input();
+            return;
+        }
+        else {
+            console.log("Device Found");
         }
 
-        var result = this.libi2c.DAPI_WriteI2c(this.handle, I2CTransRef);
-        console.log("WRITE [0x" + devAddr.toString(16) + "]: " + this.toHexString(data));
-
+        return status;
     }
 
-    Open() {
-        this.handle = this.libi2c.DAPI_OpenDeviceInstance("UsbI2cIo", 0);
-    }
-
-    GetDllVersion() {
-        return this.libi2c.DAPI_GetDllVersion();
+    GetApiVersion() {
+        return this.api.saGetAPIVersion();
     }
 
     GetFWVersion() {
         var version = ref.alloc('int16') as any;
-        return this.libi2c.DAPI_GetFirmwareVersion(this.handle, version);
+        return this.api.DAPI_GetFirmwareVersion(this.handle, version);
     }
 
 }

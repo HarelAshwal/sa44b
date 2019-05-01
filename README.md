@@ -1,17 +1,17 @@
-Devasys Red Card I2C Driver For NodeJS
+sa44b Driver For NodeJS
 
 
 ## Installation
 ```
-npm i devasys-i2c --save
+npm i sa44b --save
 ```
 
 ## Usage
 
 ```
-import devasys = require("devasys-i2c_debug");
+import sa44b = require("sa44b");
 
-var device = new devasys.DevasysI2C();
+var device = new sa44b.Sa44b();
 
 // Get Dll Version
 var dllVersion = device.GetDllVersion();
