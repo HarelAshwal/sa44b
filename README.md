@@ -13,8 +13,11 @@ import sa44b = require("sa44b");
 var device = new sa44b.Sa44b();
 
 var stat = device.Open();
-device.GetApiVersion();
-
+var ver = device.GetApiVersion();
+var name = device.GetDeviceName();
+var sn = device.GetSerialString();
+var fw = device.GetFirmwareVersion();
+var voltage = device.QueryDiagnostics();
 
 
 ```

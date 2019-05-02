@@ -122,6 +122,9 @@ export class Sa44b {
 
     InitFFI() {
         var intPtr = ref.refType('int');
+        var uintPtr = ref.refType('uint');
+        var floatPtr = ref.refType('float');
+
 
         var RTLD_GLOBAL = ffi.DynamicLibrary.FLAGS.RTLD_GLOBAL;
         // this.api = ffi.DynamicLibrary(__dirname + './sa_api.dll');
@@ -129,23 +132,23 @@ export class Sa44b {
             //  static extern saStatus saOpenDevice(ref int device);
             'saOpenDevice': ['byte', [intPtr]],
 
-            //      private static extern IntPtr saGetAPIVersion();
+           // private static extern IntPtr saGetAPIVersion();
             'saGetAPIVersion': ['string', []],
 
+           // public static extern saStatus saGetDeviceType(int device, ref int type);
+           'saGetDeviceType': ['byte', ['int',intPtr]],
+           
+           // public static extern saStatus saGetSerialNumber(int device, ref uint serial_number);
+           'saGetSerialNumber': ['byte', ['int',uintPtr]],
 
-        });
+           // public static extern saStatus saGetFirmwareString(int device, ref int version);
+           'saGetFirmwareString': ['byte', ['int',intPtr]],
 
-        //  this.api = ffi.Library('usbi2cio', {
-        // 'DAPI_GetDllVersion': ['int', []],
-
-        // // public static extern int DAPI_OpenDeviceInstance(string lpsDevName, byte byDevInstance);
-        // 'DAPI_OpenDeviceInstance': ['int', ['string', 'byte']],
-
-        // // public static extern bool DAPI_GetFirmwareVersion(IntPtr hDevInstance, ref DAPI_WORD pwVersion);
-        // 'DAPI_GetFirmwareVersion': ['bool', ['int', intPtr]],
+           // public static extern saStatus saQueryDiagnostics(int device, ref float usbVoltage);
+           'saQueryDiagnostics': ['byte', ['int',floatPtr]],
 
 
-        // });
+        });      
 
         var a = 10;
     }
@@ -167,7 +170,8 @@ export class Sa44b {
             return;
         }
         else {
-            console.log("Device Found");
+            this.handle = dev[0];
+            console.log("Device Found : " +this.handle);
         }
 
         return status;
@@ -177,9 +181,55 @@ export class Sa44b {
         return this.api.saGetAPIVersion();
     }
 
-    GetFWVersion() {
-        var version = ref.alloc('int16') as any;
-        return this.api.DAPI_GetFirmwareVersion(this.handle, version);
+   
+
+    
+   GetDeviceName()
+    {
+        var device_type  = -1;
+        var device_type_Ref = ref.alloc('int') as any;
+        this.api.saGetDeviceType(this.handle,device_type_Ref)
+        device_type = device_type_Ref[0];
+
+        if (device_type === Sa44b.sa_DEVICE_sa44B)
+            return "sa44B";
+        if (device_type === Sa44b.sa_DEVICE_sa124B)
+            return "sa124B";
+
+        return "Unknown device";
     }
+
+    GetSerialString()
+    {
+        var serial_number = ref.alloc('uint') as any;
+
+        if (this.api.saGetSerialNumber(this.handle, serial_number) === saStatus.saNoError)
+        {
+            var buf = serial_number as Buffer;
+            return buf.readUInt32LE(0).toString(); 
+        }
+
+        return "";
+    }
+
+    GetFirmwareVersion()
+    {
+        var firmware_version = ref.alloc('int') as any;
+        if (this.api.saGetFirmwareString(this.handle, firmware_version) === saStatus.saNoError)
+            return (firmware_version as Buffer).readInt32LE(0).toString();
+
+        return "";
+    }
+
+    QueryDiagnostics()
+    {
+        var voltage = ref.alloc('float') as any;
+
+        this.api.saQueryDiagnostics(this.handle,voltage);
+
+        return (voltage as Buffer).readFloatLE(0);
+    }
+
+    
 
 }
