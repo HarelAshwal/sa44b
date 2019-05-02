@@ -70,6 +70,12 @@ class Sa44b {
             'saGetFirmwareString': ['byte', ['int', intPtr]],
             // public static extern saStatus saQueryDiagnostics(int device, ref float usbVoltage);
             'saQueryDiagnostics': ['byte', ['int', floatPtr]],
+            //  public static extern saStatus saConfigLevel(int device, double ref_level);
+            'saConfigLevel': ['byte', ['int', 'double']],
+            //  public static extern saStatus saConfigAcquisition(int device,uint detector, uint scale);
+            'saConfigAcquisition': ['byte', ['int', 'uint', 'uint']],
+            //  public static extern saStatus saConfigCenterSpan(int device,double center, double span);
+            'saConfigCenterSpan': ['byte', ['int', 'double', 'double']],
         });
         var a = 10;
     }
@@ -125,6 +131,15 @@ class Sa44b {
         var voltage = ref.alloc('float');
         this.api.saQueryDiagnostics(this.handle, voltage);
         return voltage.readFloatLE(0);
+    }
+    ConfigLevel(refLevel) {
+        return this.api.saConfigLevel(this.handle, refLevel);
+    }
+    ConfigAcquisition(detector, scale) {
+        return this.api.saConfigAcquisition(this.handle, detector, scale);
+    }
+    saConfigCenterSpan(center, span) {
+        return this.api.saConfigCenterSpan(this.handle, center, span);
     }
 }
 // saGetDeviceType : type

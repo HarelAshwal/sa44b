@@ -10,6 +10,14 @@ var fw = device.GetFirmwareVersion();
 var voltage = device.QueryDiagnostics();
 
 // Configuring Device For a Sweep
+var RefLevel = 20;
+var Center = 1.0e9;
+var Span = 10.0e6;
+
+device.ConfigLevel(RefLevel);
+device.ConfigAcquisition(sa44b.Sa44b.sa_AVERAGE,sa44b.Sa44b.sa_LOG_SCALE);
+device.saConfigCenterSpan(Center,Span);
+
 
 var  oko=10;
 

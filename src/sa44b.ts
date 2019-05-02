@@ -125,7 +125,6 @@ export class Sa44b {
         var uintPtr = ref.refType('uint');
         var floatPtr = ref.refType('float');
 
-
         var RTLD_GLOBAL = ffi.DynamicLibrary.FLAGS.RTLD_GLOBAL;
         // this.api = ffi.DynamicLibrary(__dirname + './sa_api.dll');
         this.api = ffi.Library(__dirname + './sa_api.dll', {
@@ -147,7 +146,14 @@ export class Sa44b {
            // public static extern saStatus saQueryDiagnostics(int device, ref float usbVoltage);
            'saQueryDiagnostics': ['byte', ['int',floatPtr]],
 
+           //  public static extern saStatus saConfigLevel(int device, double ref_level);
+           'saConfigLevel': ['byte', ['int','double']],
 
+           //  public static extern saStatus saConfigAcquisition(int device,uint detector, uint scale);
+           'saConfigAcquisition': ['byte', ['int','uint','uint']],
+
+           //  public static extern saStatus saConfigCenterSpan(int device,double center, double span);
+           'saConfigCenterSpan': ['byte', ['int','double','double']],
         });      
 
         var a = 10;
@@ -228,6 +234,21 @@ export class Sa44b {
         this.api.saQueryDiagnostics(this.handle,voltage);
 
         return (voltage as Buffer).readFloatLE(0);
+    }
+
+    ConfigLevel(refLevel : number)
+    {
+        return this.api.saConfigLevel(this.handle, refLevel) as saStatus;
+    }
+
+    ConfigAcquisition(detector : number, scale : number)
+    {
+        return this.api.saConfigAcquisition(this.handle, detector,  scale) as saStatus;
+    }
+
+    saConfigCenterSpan( center : number,  span : number)
+    {
+        return this.api.saConfigCenterSpan(this.handle, center,  span) as saStatus;
     }
 
     
