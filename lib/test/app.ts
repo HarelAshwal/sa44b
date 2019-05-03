@@ -1,4 +1,5 @@
 import sa44b = require("../../src/sa44b");
+import { saStatus } from "../../src/sa44b";
 
 var device = new sa44b.Sa44b();
 
@@ -15,11 +16,16 @@ var Center = 1.0e9;
 var Span = 10.0e6;
 
 device.ConfigLevel(RefLevel);
-device.ConfigAcquisition(sa44b.Sa44b.sa_AVERAGE,sa44b.Sa44b.sa_LOG_SCALE);
-device.saConfigCenterSpan(Center,Span);
+device.ConfigAcquisition(sa44b.Sa44b.sa_AVERAGE, sa44b.Sa44b.sa_LOG_SCALE);
+device.ConfigCenterSpan(Center, Span);
+device.ConfigSweepCoupling(10.0e3, 10.0e3, 0.001, sa44b.Sa44b.sa_NON_NATIVE_RBW, sa44b.Sa44b.sa_NO_SPUR_REJECT);
+device.ConfigProcUnits(sa44b.Sa44b.sa_LOG);
+var status = device.Initiate(sa44b.Sa44b.sa_SWEEPING, 0);
+if (status !== saStatus.saNoError) {
+    console.log("Error: Unable to initialize Analyzer");
+}
 
-
-var  oko=10;
+var oko = 10;
 
 
 

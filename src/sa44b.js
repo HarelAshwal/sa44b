@@ -56,28 +56,75 @@ class Sa44b {
         var uintPtr = ref.refType('uint');
         var floatPtr = ref.refType('float');
         var RTLD_GLOBAL = ffi.DynamicLibrary.FLAGS.RTLD_GLOBAL;
-        // this.api = ffi.DynamicLibrary(__dirname + './sa_api.dll');
-        this.api = ffi.Library(__dirname + './sa_api.dll', {
-            //  static extern saStatus saOpenDevice(ref int device);
-            'saOpenDevice': ['byte', [intPtr]],
-            // private static extern IntPtr saGetAPIVersion();
-            'saGetAPIVersion': ['string', []],
-            // public static extern saStatus saGetDeviceType(int device, ref int type);
-            'saGetDeviceType': ['byte', ['int', intPtr]],
-            // public static extern saStatus saGetSerialNumber(int device, ref uint serial_number);
-            'saGetSerialNumber': ['byte', ['int', uintPtr]],
-            // public static extern saStatus saGetFirmwareString(int device, ref int version);
-            'saGetFirmwareString': ['byte', ['int', intPtr]],
-            // public static extern saStatus saQueryDiagnostics(int device, ref float usbVoltage);
-            'saQueryDiagnostics': ['byte', ['int', floatPtr]],
-            //  public static extern saStatus saConfigLevel(int device, double ref_level);
-            'saConfigLevel': ['byte', ['int', 'double']],
-            //  public static extern saStatus saConfigAcquisition(int device,uint detector, uint scale);
-            'saConfigAcquisition': ['byte', ['int', 'uint', 'uint']],
-            //  public static extern saStatus saConfigCenterSpan(int device,double center, double span);
-            'saConfigCenterSpan': ['byte', ['int', 'double', 'double']],
-        });
+        var api_methods_desc = [
+            "public static extern saStatus saOpenDevice(ref int device)",
+            "private static extern IntPtr saGetAPIVersion();",
+            "public static extern saStatus saGetDeviceType(int device, ref int type)",
+            "public static extern saStatus saGetSerialNumber(int device, ref uint serial_number);",
+            "public static extern saStatus saGetFirmwareString(int device, ref int version);",
+            "public static extern saStatus saQueryDiagnostics(int device, ref float usbVoltage);",
+            "public static extern saStatus saConfigLevel(int device, double ref_level);",
+            "public static extern saStatus saConfigAcquisition(int device,uint detector, uint scale);",
+            "public static extern saStatus saConfigCenterSpan(int device,double center, double span);",
+            `public static extern saStatus saConfigSweepCoupling(int device,double rbw, double vbw, double sweepTime, uint rbw_type, uint rejection);`,
+            "public static extern saStatus saConfigProcUnits(int device, uint units);",
+            `public static extern saStatus saInitiate(int device,uint mode, uint flag);`,
+            "private static extern IntPtr saGetErrorString(saStatus status);",
+        ];
+        var methods_obj = this.generateMethodObject(api_methods_desc);
+        this.api = ffi.Library(__dirname + './sa_api.dll', methods_obj);
         var a = 10;
+    }
+    generateMethodObject(methodsObjectDescription) {
+        var methods_obj = {};
+        for (var method_desc of methodsObjectDescription) {
+            var method_desc_split = method_desc.trim().split(' ');
+            // removes the first three letters..
+            for (var i = 0; i < 3; i++)
+                method_desc_split.shift();
+            // get return value
+            var retrunValue = method_desc_split[0].trim();
+            var retrunValueObj = "";
+            switch (retrunValue) {
+                case "saStatus":
+                    retrunValueObj = 'byte';
+                    break;
+                case "IntPtr":
+                    retrunValueObj = 'string';
+                    break;
+            }
+            // method name
+            var method_name = method_desc_split[1].split('(')[0].trim();
+            // args
+            // remove return type
+            method_desc_split.shift();
+            var methodNameAndArgs = method_desc_split.join(' ');
+            // remove method name
+            var args = [];
+            var argsOnly = methodNameAndArgs.replace(method_name, "").replace('(', '').replace(')', '').replace(';', '').trim();
+            if (argsOnly !== "") {
+                var argsOnly_split = argsOnly.split(',');
+                for (var arg of argsOnly_split) {
+                    var arg_split = arg.trim().split(' ');
+                    if (arg_split.length === 2) {
+                        // no ref
+                        var argType = arg_split[0].trim();
+                        if (argType === "saStatus")
+                            argType = 'byte';
+                        args.push(argType);
+                    }
+                    else {
+                        // ref
+                        var refTypeName = arg_split[1];
+                        var ptr = ref.refType(refTypeName);
+                        args.push(ptr);
+                    }
+                }
+            }
+            methods_obj[method_name] = [retrunValueObj, args];
+            console.log(retrunValueObj + " " + method_name + " " + JSON.stringify(args));
+        }
+        return methods_obj;
     }
     toHexString(byteArray) {
         return Array.from(byteArray, function (byte) {
@@ -138,8 +185,17 @@ class Sa44b {
     ConfigAcquisition(detector, scale) {
         return this.api.saConfigAcquisition(this.handle, detector, scale);
     }
-    saConfigCenterSpan(center, span) {
+    ConfigCenterSpan(center, span) {
         return this.api.saConfigCenterSpan(this.handle, center, span);
+    }
+    ConfigSweepCoupling(rbw, vbw, sweepTime, rbw_type, rejection) {
+        return this.api.saConfigSweepCoupling(this.handle, rbw, vbw, sweepTime, rbw_type, rejection);
+    }
+    ConfigProcUnits(units) {
+        return this.api.saConfigProcUnits(this.handle, units);
+    }
+    Initiate(mode, flag) {
+        return this.api.saInitiate(this.handle, mode, flag);
     }
 }
 // saGetDeviceType : type
