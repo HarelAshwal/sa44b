@@ -25,6 +25,9 @@ if (status !== saStatus.saNoError) {
     console.log("Error: Unable to initialize Analyzer");
 }
 
+var sweepInfo = device.QuerySweepInfo();
+
+
 var oko = 10;
 
 

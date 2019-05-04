@@ -141,6 +141,9 @@ export class Sa44b {
             "public static extern saStatus saConfigProcUnits(int device, uint units);",
             `public static extern saStatus saInitiate(int device,uint mode, uint flag);`,
             "private static extern IntPtr saGetErrorString(saStatus status);",
+            "public static extern saStatus saQuerySweepInfo(int device, ref uint trace_len, ref double start, ref double bin_size);",
+
+
         ];
 
 
@@ -306,9 +309,34 @@ export class Sa44b {
         return this.api.saInitiate(this.handle, mode, flag) as saStatus;
     }
 
+    QuerySweepInfo() {
+        var traceLen = ref.alloc('uint') as Buffer;
+        var start = ref.alloc('double') as Buffer;
+        var bin_size = ref.alloc('double') as Buffer;
+
+        var stat = this.api.saQuerySweepInfo(this.handle, traceLen, start, bin_size) as saStatus;
+
+        if (stat === saStatus.saNoError)
+            return new SweepInfo(
+                traceLen.readUInt32LE(0),
+                start.readDoubleLE(0),
+                bin_size.readDoubleLE(0));
+        else return null;
+
+    }
 
 
 
 
+
+
+}
+
+export class SweepInfo {
+    constructor(
+        public traceLen: number,
+        public start: number,
+        public bin_size: number
+    ) { }
 
 }

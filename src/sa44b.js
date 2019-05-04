@@ -70,6 +70,7 @@ class Sa44b {
             "public static extern saStatus saConfigProcUnits(int device, uint units);",
             `public static extern saStatus saInitiate(int device,uint mode, uint flag);`,
             "private static extern IntPtr saGetErrorString(saStatus status);",
+            "public static extern saStatus saQuerySweepInfo(int device, ref uint trace_len, ref double start, ref double bin_size);",
         ];
         var methods_obj = this.generateMethodObject(api_methods_desc);
         this.api = ffi.Library(__dirname + './sa_api.dll', methods_obj);
@@ -197,6 +198,16 @@ class Sa44b {
     Initiate(mode, flag) {
         return this.api.saInitiate(this.handle, mode, flag);
     }
+    QuerySweepInfo() {
+        var traceLen = ref.alloc('uint');
+        var start = ref.alloc('double');
+        var bin_size = ref.alloc('double');
+        var stat = this.api.saQuerySweepInfo(this.handle, traceLen, start, bin_size);
+        if (stat === saStatus.saNoError)
+            return new SweepInfo(traceLen.readUInt32LE(0), start.readDoubleLE(0), bin_size.readDoubleLE(0));
+        else
+            return null;
+    }
 }
 // saGetDeviceType : type
 Sa44b.sa_DEVICE_sa124B = 0x4;
@@ -256,4 +267,12 @@ Sa44b.sa_PORT2_OUT_LOGIC_HIGH = 0x20;
 Sa44b.sa_PORT2_IN_TRIGGER_RISING_EDGE = 0x40;
 Sa44b.sa_PORT2_IN_TRIGGER_FALLING_EDGE = 0x60;
 exports.Sa44b = Sa44b;
+class SweepInfo {
+    constructor(traceLen, start, bin_size) {
+        this.traceLen = traceLen;
+        this.start = start;
+        this.bin_size = bin_size;
+    }
+}
+exports.SweepInfo = SweepInfo;
 //# sourceMappingURL=sa44b.js.map
