@@ -198,7 +198,8 @@ export class Sa44b {
 
                             // define the "float[]" type
                             var arrayPtr = ref.refType(ArrayType(ref.types.float))
-                            args.push(arrayPtr);
+                            //   args.push(arrayPtr);
+                            args.push('float *');
                         }
                         else args.push(argType);
                     }
@@ -213,7 +214,7 @@ export class Sa44b {
             }
 
             methods_obj[method_name] = [retrunValueObj, args];
-            //        console.log(retrunValueObj + " " + method_name + " " + JSON.stringify(args));
+            //      console.log(retrunValueObj + " " + method_name + " " + JSON.stringify(args));
 
         }
 
@@ -335,6 +336,7 @@ export class Sa44b {
     GetSweep_32f(sweepInfo: SweepInfo) {
         var min = Buffer.alloc(sweepInfo.traceLen * 4);
         var max = Buffer.alloc(sweepInfo.traceLen * 4);
+
 
         var stat = this.api.saGetSweep_32f(this.handle, min, max) as saStatus;
 

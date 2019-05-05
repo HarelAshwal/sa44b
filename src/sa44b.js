@@ -117,7 +117,8 @@ class Sa44b {
                         if (argType.includes('[]')) {
                             // define the "float[]" type
                             var arrayPtr = ref.refType(ArrayType(ref.types.float));
-                            args.push(arrayPtr);
+                            //   args.push(arrayPtr);
+                            args.push('float *');
                         }
                         else
                             args.push(argType);
@@ -131,7 +132,7 @@ class Sa44b {
                 }
             }
             methods_obj[method_name] = [retrunValueObj, args];
-            //        console.log(retrunValueObj + " " + method_name + " " + JSON.stringify(args));
+            //      console.log(retrunValueObj + " " + method_name + " " + JSON.stringify(args));
         }
         return methods_obj;
     }
