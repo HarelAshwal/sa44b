@@ -1,3 +1,4 @@
+/// <reference types="node" />
 export declare enum saStatus {
     saInvalidModeErr = -112,
     saReferenceLevelErr = -111,
@@ -83,8 +84,29 @@ export declare class Sa44b {
     api: any;
     handle: number;
     InitFFI(): void;
+    generateMethodObject(methodsObjectDescription: string[]): {};
     toHexString(byteArray: number[]): string;
     Open(): saStatus.saNoError;
     GetApiVersion(): any;
-    GetFWVersion(): any;
+    GetDeviceName(): "sa44B" | "sa124B" | "Unknown device";
+    GetSerialString(): string;
+    GetFirmwareVersion(): string;
+    QueryDiagnostics(): number;
+    ConfigLevel(refLevel: number): saStatus;
+    ConfigAcquisition(detector: number, scale: number): saStatus;
+    ConfigCenterSpan(center: number, span: number): saStatus;
+    ConfigSweepCoupling(rbw: number, vbw: number, sweepTime: number, rbw_type: number, rejection: number): saStatus;
+    ConfigProcUnits(units: number): saStatus;
+    Initiate(mode: number, flag: number): saStatus;
+    QuerySweepInfo(): SweepInfo;
+    GetSweep_32f(size: number): {
+        min: Buffer;
+        max: Buffer;
+    };
+}
+export declare class SweepInfo {
+    traceLen: number;
+    start: number;
+    bin_size: number;
+    constructor(traceLen: number, start: number, bin_size: number);
 }

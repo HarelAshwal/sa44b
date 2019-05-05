@@ -1,7 +1,7 @@
 import * as ffi from 'ffi';
 import * as ref from 'ref';
-import * as Struct from 'ref-struct';
 import * as ArrayType from 'ref-array';
+
 
 export enum saStatus {
     // Configuration Errors
@@ -142,7 +142,7 @@ export class Sa44b {
             `public static extern saStatus saInitiate(int device,uint mode, uint flag);`,
             "private static extern IntPtr saGetErrorString(saStatus status);",
             "public static extern saStatus saQuerySweepInfo(int device, ref uint trace_len, ref double start, ref double bin_size);",
-
+            "public static extern saStatus saGetSweep_32f(int device,float[] min, float[] max);",
 
         ];
 
@@ -150,6 +150,8 @@ export class Sa44b {
         var methods_obj = this.generateMethodObject(api_methods_desc);
 
         this.api = ffi.Library(__dirname + './sa_api.dll', methods_obj);
+
+
 
         var a = 10;
     }
@@ -192,7 +194,13 @@ export class Sa44b {
                         // no ref
                         var argType = arg_split[0].trim();
                         if (argType === "saStatus") argType = 'byte';
-                        args.push(argType);
+                        if (argType.includes('[]')) {
+
+                            // define the "float[]" type
+                            var arrayPtr = ref.refType(ArrayType(ref.types.float))
+                            args.push(arrayPtr);
+                        }
+                        else args.push(argType);
                     }
                     else {
                         // ref
@@ -205,7 +213,7 @@ export class Sa44b {
             }
 
             methods_obj[method_name] = [retrunValueObj, args];
-            console.log(retrunValueObj + " " + method_name + " " + JSON.stringify(args));
+            //        console.log(retrunValueObj + " " + method_name + " " + JSON.stringify(args));
 
         }
 
@@ -322,8 +330,30 @@ export class Sa44b {
                 start.readDoubleLE(0),
                 bin_size.readDoubleLE(0));
         else return null;
-
     }
+
+    GetSweep_32f(sweepInfo: SweepInfo) {
+        var min = Buffer.alloc(sweepInfo.traceLen * 4);
+        var max = Buffer.alloc(sweepInfo.traceLen * 4);
+
+        var stat = this.api.saGetSweep_32f(this.handle, min, max) as saStatus;
+
+        console.log(saStatus[stat]);
+
+        var Points: Point[] = [];
+
+        for (var i = 0; i < sweepInfo.traceLen; i++) {
+            var max_float = max.readFloatLE(i * 4);
+            var point = new Point(
+                sweepInfo.start + i * sweepInfo.bin_size / 1.0e6,
+                max_float
+            )
+            Points.push(point);
+        }
+
+        return Points;
+    }
+
 
 
 
@@ -339,4 +369,11 @@ export class SweepInfo {
         public bin_size: number
     ) { }
 
+}
+
+export class Point {
+    constructor(
+        public x: number,
+        public y: number
+    ) { }
 }

@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const ffi = require("ffi");
 const ref = require("ref");
+const ArrayType = require("ref-array");
 var saStatus;
 (function (saStatus) {
     // Configuration Errors
@@ -71,6 +72,7 @@ class Sa44b {
             `public static extern saStatus saInitiate(int device,uint mode, uint flag);`,
             "private static extern IntPtr saGetErrorString(saStatus status);",
             "public static extern saStatus saQuerySweepInfo(int device, ref uint trace_len, ref double start, ref double bin_size);",
+            "public static extern saStatus saGetSweep_32f(int device,float[] min, float[] max);",
         ];
         var methods_obj = this.generateMethodObject(api_methods_desc);
         this.api = ffi.Library(__dirname + './sa_api.dll', methods_obj);
@@ -112,7 +114,13 @@ class Sa44b {
                         var argType = arg_split[0].trim();
                         if (argType === "saStatus")
                             argType = 'byte';
-                        args.push(argType);
+                        if (argType.includes('[]')) {
+                            // define the "float[]" type
+                            var arrayPtr = ref.refType(ArrayType(ref.types.float));
+                            args.push(arrayPtr);
+                        }
+                        else
+                            args.push(argType);
                     }
                     else {
                         // ref
@@ -123,7 +131,7 @@ class Sa44b {
                 }
             }
             methods_obj[method_name] = [retrunValueObj, args];
-            console.log(retrunValueObj + " " + method_name + " " + JSON.stringify(args));
+            //        console.log(retrunValueObj + " " + method_name + " " + JSON.stringify(args));
         }
         return methods_obj;
     }
@@ -208,6 +216,19 @@ class Sa44b {
         else
             return null;
     }
+    GetSweep_32f(sweepInfo) {
+        var min = Buffer.alloc(sweepInfo.traceLen * 4);
+        var max = Buffer.alloc(sweepInfo.traceLen * 4);
+        var stat = this.api.saGetSweep_32f(this.handle, min, max);
+        console.log(saStatus[stat]);
+        var Points = [];
+        for (var i = 0; i < sweepInfo.traceLen; i++) {
+            var max_float = max.readFloatLE(i * 4);
+            var point = new Point(sweepInfo.start + i * sweepInfo.bin_size / 1.0e6, max_float);
+            Points.push(point);
+        }
+        return Points;
+    }
 }
 // saGetDeviceType : type
 Sa44b.sa_DEVICE_sa124B = 0x4;
@@ -275,4 +296,11 @@ class SweepInfo {
     }
 }
 exports.SweepInfo = SweepInfo;
+class Point {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+}
+exports.Point = Point;
 //# sourceMappingURL=sa44b.js.map
