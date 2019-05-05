@@ -1,4 +1,3 @@
-/// <reference types="node" />
 export declare enum saStatus {
     saInvalidModeErr = -112,
     saReferenceLevelErr = -111,
@@ -99,14 +98,16 @@ export declare class Sa44b {
     ConfigProcUnits(units: number): saStatus;
     Initiate(mode: number, flag: number): saStatus;
     QuerySweepInfo(): SweepInfo;
-    GetSweep_32f(size: number): {
-        min: Buffer;
-        max: Buffer;
-    };
+    GetSweep_32f(sweepInfo: SweepInfo): Point[];
 }
 export declare class SweepInfo {
     traceLen: number;
     start: number;
     bin_size: number;
     constructor(traceLen: number, start: number, bin_size: number);
+}
+export declare class Point {
+    x: number;
+    y: number;
+    constructor(x: number, y: number);
 }
