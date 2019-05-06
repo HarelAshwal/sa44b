@@ -1,43 +1,80 @@
 
-import { Sa44b, saStatus } from "../../src/sa44b";
+import { Sa44b, saStatus } from "../sa44b";
 
+const DELAY = 0;
 
-// setTimeout(() => { console.log('keepalinve') }, 10000);
-
-
-var device = new Sa44b();
-
-var stat = device.Open();
-var ver = device.GetApiVersion();
-var name = device.GetDeviceName();
-var sn = device.GetSerialString();
-var fw = device.GetFirmwareVersion();
-var voltage = device.QueryDiagnostics();
-
-// Configuring Device For a Sweep
-var RefLevel = 20;
-var Center = 1.0e9;
-var Span = 10.0e6;
-
-device.ConfigLevel(RefLevel);
-device.ConfigAcquisition(Sa44b.sa_AVERAGE, Sa44b.sa_LOG_SCALE);
-device.ConfigCenterSpan(Center, Span);
-device.ConfigSweepCoupling(10.0e3, 10.0e3, 0.001, Sa44b.sa_NON_NATIVE_RBW, Sa44b.sa_NO_SPUR_REJECT);
-device.ConfigProcUnits(Sa44b.sa_LOG);
-var status = device.Initiate(Sa44b.sa_SWEEPING, 0);
-if (status !== saStatus.saNoError) {
-    console.log("Error: Unable to initialize Analyzer");
+async function Delay(milliseconds: number) {
+    return new Promise<void>(resolve => {
+        setTimeout(resolve, milliseconds);
+    });
 }
 
-var sweepInfo = device.QuerySweepInfo();
-var points = device.GetSweep_32f(sweepInfo);
+async function Main() {
 
-console.log(points[0]);
+    var device = new Sa44b();
 
-console.log(sweepInfo);
-var oko = 10;
+    var stat = device.Open();
+    console.log("Opened " + saStatus[stat]);
+
+    await Delay(DELAY);
+
+    var ver = device.GetApiVersion();
+    await Delay(DELAY);
+
+    var name = device.GetDeviceName();
+    await Delay(DELAY);
+
+    var sn = device.GetSerialString();
+    await Delay(DELAY);
+
+    var fw = device.GetFirmwareVersion();
+    await Delay(DELAY);
+
+    var voltage = device.QueryDiagnostics();
+    await Delay(DELAY);
+    console.log("Got voltage : " + voltage);
+
+    // Configuring Device For a Sweep
+    var RefLevel = 20;
+    var Center = 1.0e9;
+    var Span = 10.0e6;
 
 
+    device.ConfigLevel(RefLevel);
+    await Delay(DELAY);
+    console.log('level ' + RefLevel);
+
+    device.ConfigAcquisition(Sa44b.sa_AVERAGE, Sa44b.sa_LOG_SCALE);
+    await Delay(DELAY);
+
+    device.ConfigCenterSpan(Center, Span);
+    await Delay(DELAY);
+
+    device.ConfigSweepCoupling(10.0e3, 10.0e3, 0.001, Sa44b.sa_NON_NATIVE_RBW, Sa44b.sa_NO_SPUR_REJECT);
+    await Delay(DELAY);
+
+    device.ConfigProcUnits(Sa44b.sa_LOG);
+    await Delay(DELAY);
+
+    var status = device.Initiate(Sa44b.sa_SWEEPING, 0);
+    await Delay(DELAY);
+    if (status !== saStatus.saNoError) {
+        console.log("Error: Unable to initialize Analyzer");
+    }
+
+    var sweepInfo = device.QuerySweepInfo();
+    await Delay(DELAY);
+
+    var points = device.GetSweep_32f(sweepInfo);
+
+    console.log(points[0]);
+
+    console.log(sweepInfo);
+    var oko = 10;
+
+}
+
+Main();
 
 
 
