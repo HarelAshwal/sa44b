@@ -18,17 +18,17 @@ async function Main() {
 
     await Delay(DELAY);
 
-    var ver = device.GetApiVersion();
-    await Delay(DELAY);
+    // var ver = device.GetApiVersion();
+    // await Delay(DELAY);
 
-    var name = device.GetDeviceName();
-    await Delay(DELAY);
+    // var name = device.GetDeviceName();
+    // await Delay(DELAY);
 
-    var sn = device.GetSerialString();
-    await Delay(DELAY);
+    // var sn = device.GetSerialString();
+    // await Delay(DELAY);
 
-    var fw = device.GetFirmwareVersion();
-    await Delay(DELAY);
+    // var fw = device.GetFirmwareVersion();
+    // await Delay(DELAY);
 
     var voltage = device.QueryDiagnostics();
     await Delay(DELAY);
