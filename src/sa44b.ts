@@ -151,7 +151,7 @@ export class Sa44b {
         if (!fs.existsSync(dllPath)) {
             dllPath = process.cwd() + '\\sa_api.dll';
             if (!fs.existsSync(dllPath)) {
-                console.log("error : can't locate sa_api.dll file!!!!")
+                console.log("error : can't locate sa_api.dll file at : " + dllPath)
             }
         }
 
