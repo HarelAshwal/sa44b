@@ -115,10 +115,7 @@ export class Sa44b {
 
     api: any;
     handle: number = -1;
-
-
-
-
+    isOpen: boolean = false;
 
     InitFFI() {
         var intPtr = ref.refType('int');
@@ -240,6 +237,7 @@ export class Sa44b {
         else {
             this.handle = dev[0];
             console.log("Device Found : " + this.handle);
+            this.isOpen = true;
         }
 
         return status;

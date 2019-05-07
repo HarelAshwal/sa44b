@@ -3,6 +3,7 @@ import { Sa44b, saStatus } from "../sa44b";
 var device = new Sa44b();
 
 var stat = device.Open();
+console.log(device.isOpen);
 
 //var ver = device.GetApiVersion();
 //var name = device.GetDeviceName();

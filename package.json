@@ -1,7 +1,7 @@
 {
   "author": "harel.ashwal",
   "name": "sa44b",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "sa44b driver for nodejs (using FFI)",
   "main": "lib/sa44b.js",
   "types": "lib/sa44b.d.ts",

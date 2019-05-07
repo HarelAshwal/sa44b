@@ -82,6 +82,7 @@ export declare class Sa44b {
     constructor();
     api: any;
     handle: number;
+    isOpen: boolean;
     InitFFI(): void;
     generateMethodObject(methodsObjectDescription: string[]): {};
     toHexString(byteArray: number[]): string;

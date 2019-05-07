@@ -13,6 +13,7 @@ import sa44b = require("sa44b");
 var device = new Sa44b();
 
 var stat = device.Open();
+console.log(device.isOpen);
 
 //var ver = device.GetApiVersion();
 //var name = device.GetDeviceName();
