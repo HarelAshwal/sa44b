@@ -10,34 +10,35 @@ npm i sa44b --save
 ```
 import sa44b = require("sa44b");
 
-var device = new sa44b.Sa44b();
+var device = new Sa44b();
 
- var stat = device.Open();
-    var ver = device.GetApiVersion();
-    var name = device.GetDeviceName();
-    var sn = device.GetSerialString();
-    var fw = device.GetFirmwareVersion();
-    var voltage = device.QueryDiagnostics();
+var stat = device.Open();
 
-    // Configuring Device For a Sweep
-    var RefLevel = 20;
-    var Center = 1.0e9;
-    var Span = 10.0e6;
+//var ver = device.GetApiVersion();
+//var name = device.GetDeviceName();
+var sn = device.GetSerialString();
+var fw = device.GetFirmwareVersion();
+var voltage = device.QueryDiagnostics();
 
-    device.ConfigLevel(RefLevel);
-    device.ConfigAcquisition(sa44b.Sa44b.sa_AVERAGE, sa44b.Sa44b.sa_LOG_SCALE);
-    device.ConfigCenterSpan(Center, Span);
-    device.ConfigSweepCoupling(10.0e3, 10.0e3, 0.001, sa44b.Sa44b.sa_NON_NATIVE_RBW, sa44b.Sa44b.sa_NO_SPUR_REJECT);
-    device.ConfigProcUnits(sa44b.Sa44b.sa_LOG);
-    var status = device.Initiate(sa44b.Sa44b.sa_SWEEPING, 0);
-    if (status !== saStatus.saNoError) {
-        console.log("Error: Unable to initialize Analyzer");
-    }
+// Configuring Device For a Sweep
+var RefLevel = 20;
+var Center = 1.0e9;
+var Span = 10.0e6;
 
-    var sweepInfo = device.QuerySweepInfo();
-    var points = device.GetSweep_32f(sweepInfo);
+device.ConfigLevel(RefLevel);
+device.ConfigAcquisition(Sa44b.sa_AVERAGE, Sa44b.sa_LOG_SCALE);
+device.ConfigCenterSpan(Center, Span);
+device.ConfigSweepCoupling(10.0e3, 10.0e3, 0.001, Sa44b.sa_NON_NATIVE_RBW, Sa44b.sa_NO_SPUR_REJECT);
+device.ConfigProcUnits(Sa44b.sa_LOG);
+var status = device.Initiate(Sa44b.sa_SWEEPING, 0);
+if (status !== saStatus.saNoError) {
+    console.log("Error: Unable to initialize Analyzer");
+}
 
-    console.log(points[0]);
+var sweepInfo = device.QuerySweepInfo();
+var points = device.GetSweep_32f(sweepInfo);
+
+console.log(points[0]);
 
 
 ```
