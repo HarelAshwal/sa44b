@@ -1,7 +1,7 @@
 import * as ffi from 'ffi';
 import * as ref from 'ref';
 import * as ArrayType from 'ref-array';
-
+import fs = require('fs');
 
 export enum saStatus {
     // Configuration Errors
@@ -146,7 +146,16 @@ export class Sa44b {
 
         var methods_obj = this.generateMethodObject(api_methods_desc);
 
-        this.api = ffi.Library(__dirname + './sa_api.dll', methods_obj);
+        var dllPath = __dirname + '\\sa_api.dll';
+        // support for pkg-wised compile...
+        if (!fs.existsSync(dllPath)) {
+            dllPath = process.cwd() + '\\sa_api.dll';
+            if (!fs.existsSync(dllPath)) {
+                console.log("error : can't locate sa_api.dll file!!!!")
+            }
+        }
+
+        this.api = ffi.Library(dllPath, methods_obj);
 
 
 
