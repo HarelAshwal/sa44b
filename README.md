@@ -17,8 +17,8 @@ console.log(device.isOpen);
 
 //var ver = device.GetApiVersion();
 //var name = device.GetDeviceName();
-var sn = device.GetSerialString();
-var fw = device.GetFirmwareVersion();
+//var sn = device.GetSerialString();
+//var fw = device.GetFirmwareVersion();
 var voltage = device.QueryDiagnostics();
 
 // Configuring Device For a Sweep

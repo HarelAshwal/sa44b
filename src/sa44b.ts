@@ -354,7 +354,7 @@ export class Sa44b {
         for (var i = 0; i < sweepInfo.traceLen; i++) {
             var max_float = max.readFloatLE(i * 4);
             var point = new Point(
-                sweepInfo.start + i * sweepInfo.bin_size / 1.0e6,
+                (sweepInfo.start + i * sweepInfo.bin_size) / 1.0e6,
                 max_float
             )
             Points.push(point);
